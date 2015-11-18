@@ -7,12 +7,11 @@ function loadXMLDoc(url) {
 	else if (window.ActiveXObject) {// code for IE5, IE6
 		xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
 	}
-	if (xmlhttp!=null) {
+	if (xmlhttp != null) {
 		//xmlhttp.onreadystatechange=onResponse;
 		xmlhttp.open("GET",url,false);
 		xmlhttp.send(null);
-	}
-	else {
+	} else {
 		alert("Your browser does not support XMLHTTP.");
 		return;
 	}
@@ -27,7 +26,7 @@ function parseDicts(xmlDoc, famesDict) {
 		//write(famesChildDict[i].firstChild.nodeName + " ");
 		//}
 		//var keyNodes = famesChildDict[i].firstChild.getElementsByTagName("key");
-		document.write(famesChildDict[i+1][1].firstChild.nodeName + "  ");
+		//document.write(famesChildDict[i+1][1].firstChild.nodeName + "  ");
 	}
 
 
@@ -43,4 +42,3 @@ function parseXml(url) {
 	famesDict = rootDictNodes[1];
 	parseDicts(xmlDoc, famesDict);
 }
-
