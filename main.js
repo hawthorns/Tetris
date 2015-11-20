@@ -1,4 +1,4 @@
-var FPS = 25;
+var FPS = 1;
 var workBoard = null;
 
 function moveBox() {
@@ -13,8 +13,8 @@ function main() {
   var myBoard = new board(10, 20, ctx);
   myBoard.init();
   workBoard = myBoard;
-	// setInterval("loop()", 1000/FPS);
-  loop();
+  setInterval("loop()", 1000/FPS);
+  //loop();
 }
 
 function loop() {
