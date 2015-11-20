@@ -25,7 +25,10 @@ function keydownCallback(e) {
                 workBoard.gamePaused = true;
             }
             break;
+		default:
+			return;
     }
+	e.preventDefault();
 }
 
 function keyupCallback(e) {
@@ -42,7 +45,10 @@ function keyupCallback(e) {
         case 83: // s
             workBoard.movingDown = false;
             break;
+		default:
+			return;
     }
+	e.preventDefault();
 }
 
 function main() {

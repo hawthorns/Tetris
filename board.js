@@ -1,6 +1,7 @@
 var BLANK = 46 // '.';
 var BOX_SIZE = 20;
-var BOARD_MARGIN = 80;
+var MARGIN_TOP = 80;
+var MARGIN_LEFT = 150;
 var TEMPLATE_WIDTH = 5
 var TEMPLATE_HEIGHT = 5
 var interval = 1000;
@@ -11,9 +12,10 @@ function board(boardWidth, boardHeight, ctx) {
   this.graphics = ctx;
   this.score = 0;
   this.clolorMap = ["white", "rgb(185, 185, 185)", "red", 
-        "rgb(175,  20,  20)", "green", "rgb( 20, 175,  20)",
+        "rgb(175,  20,  20)", "green", "rgb( 20, 175,  20)", "blue",
         "rgb( 20,  20, 175)", "yellow", "rgb(175, 175,  20)"];
   this.fallingSpirit = null;
+  this.nextSpirit = null;
   this.boardMap = null;
   this.movingLeft = false;
   this.movingRight = false;
@@ -29,129 +31,20 @@ board.prototype.init = function() {
         for (var y = 0; y < this.boardHeight; y++) {
             boardMap[x][y] = BLANK;
         }
-    }
-  this.boardMap = boardMap;
-  var S_SPIRIT_TEMPLATE =
-  [['.....',
-    '.....',
-    '..OO.',
-    '.OO..',
-  '.....'],
-  ['.....',
-    '..O..',
-    '..OO.',
-    '...O.',
-  '.....']]
-
-  var Z_SPIRIT_TEMPLATE =
-  [['.....',
-    '.....',
-    '.OO..',
-    '..OO.',
-  '.....'],
-  ['.....',
-    '..O..',
-    '.OO..',
-    '.O...',
-  '.....']]
-
-  var I_SPIRIT_TEMPLATE =
-  [['..O..',
-    '..O..',
-    '..O..',
-    '..O..',
-  '.....'],
-  ['.....',
-    '.....',
-    'OOOO.',
-    '.....',
-  '.....']]
-
-  var O_SPIRIT_TEMPLATE =
-  [['.....',
-    '.....',
-    '.OO..',
-    '.OO..',
-  '.....']]
-
-  var J_SPIRIT_TEMPLATE =
-  [['.....',
-    '.O...',
-    '.OOO.',
-    '.....',
-  '.....'],
-  ['.....',
-    '..OO.',
-    '..O..',
-    '..O..',
-  '.....'],
-  ['.....',
-    '.....',
-    '.OOO.',
-    '...O.',
-  '.....'],
-  ['.....',
-    '..O..',
-    '..O..',
-    '.OO..',
-  '.....']]
-
-  var L_SPIRIT_TEMPLATE =
-  [['.....',
-    '...O.',
-    '.OOO.',
-    '.....',
-  '.....'],
-  ['.....',
-    '..O..',
-    '..O..',
-    '..OO.',
-  '.....'],
-  ['.....',
-    '.....',
-    '.OOO.',
-    '.O...',
-  '.....'],
-  ['.....',
-    '.OO..',
-    '..O..',
-    '..O..',
-  '.....']]
-
-  var T_SPIRIT_TEMPLATE =
-  [['.....',
-    '..O..',
-    '.OOO.',
-    '.....',
-  '.....'],
-  ['.....',
-    '..O..',
-    '..OO.',
-    '..O..',
-  '.....'],
-  ['.....',
-    '.....',
-    '.OOO.',
-    '..O..',
-  '.....'],
-  ['.....',
-    '..O..',
-    '.OO..',
-    '..O..',
-  '.....']]
-
-  var SPIRITS = [
-    S_SPIRIT_TEMPLATE,
-    Z_SPIRIT_TEMPLATE,
-    J_SPIRIT_TEMPLATE,
-    L_SPIRIT_TEMPLATE,
-    I_SPIRIT_TEMPLATE,
-    O_SPIRIT_TEMPLATE,
-    T_SPIRIT_TEMPLATE
-  ];
-  this.SPIRITS = SPIRITS;
+	}
+	this.boardMap = boardMap;
+	var SPIRITS = [
+		S_SPIRIT_TEMPLATE,
+		Z_SPIRIT_TEMPLATE,
+		J_SPIRIT_TEMPLATE,
+		L_SPIRIT_TEMPLATE,
+		I_SPIRIT_TEMPLATE,
+		O_SPIRIT_TEMPLATE,
+		T_SPIRIT_TEMPLATE
+			];
+	this.SPIRITS = SPIRITS;
+	this.nextSpirit = this.newSpirit();
 }
-
 
 board.prototype.drawBoard = function() {
     for (var x = 0; x < this.boardWidth;  x++) {
@@ -159,33 +52,68 @@ board.prototype.drawBoard = function() {
             var color = this.boardMap[x][y];
             if(color != BLANK) {
                 this.graphics.fillStyle = this.clolorMap[color];
-                this.graphics.fillRect(BOARD_MARGIN+x*BOX_SIZE, BOARD_MARGIN+y*BOX_SIZE, BOX_SIZE, BOX_SIZE);
+                this.graphics.fillRect(MARGIN_LEFT+x*BOX_SIZE, MARGIN_TOP+y*BOX_SIZE, BOX_SIZE, BOX_SIZE);
             }
         }
     }
 }
 
 board.prototype.drawBoardLine = function() {
-    this.graphics.strokeStyle = "rgb(0, 0, 155)";
+    this.graphics.strokeStyle = "rgba(255,255,255, .5)";
     this.graphics.beginPath();
-    for (var x = 0; x <= this.boardHeight;  x++) {
-        this.graphics.moveTo(BOARD_MARGIN, x*BOX_SIZE+BOARD_MARGIN);
-        this.graphics.lineTo(this.boardWidth*BOX_SIZE+BOARD_MARGIN, x*BOX_SIZE+BOARD_MARGIN);
+
+    for (var x = 0; x <= this.boardWidth; x++) {
+        this.graphics.moveTo(x*BOX_SIZE+MARGIN_LEFT, MARGIN_TOP);
+        this.graphics.lineTo(x*BOX_SIZE+MARGIN_LEFT, this.boardHeight*BOX_SIZE+MARGIN_TOP);
     }
 
-    for (var y = 0; y <= this.boardWidth; y++) {
-        this.graphics.moveTo(y*BOX_SIZE+BOARD_MARGIN, BOARD_MARGIN);
-        this.graphics.lineTo(y*BOX_SIZE+BOARD_MARGIN, this.boardHeight*BOX_SIZE+BOARD_MARGIN);
+    for (var y = 0; y <= this.boardHeight;  y++) {
+        this.graphics.moveTo(MARGIN_LEFT, y*BOX_SIZE+MARGIN_TOP);
+        this.graphics.lineTo(this.boardWidth*BOX_SIZE+MARGIN_LEFT, y*BOX_SIZE+MARGIN_TOP);
     }
+
+	var px = MARGIN_LEFT+this.boardWidth*BOX_SIZE+BOX_SIZE;
+	for (var x = 0; x <= TEMPLATE_WIDTH; x++) {
+        this.graphics.moveTo(x*BOX_SIZE+px, MARGIN_TOP);
+        this.graphics.lineTo(x*BOX_SIZE+px, TEMPLATE_HEIGHT*BOX_SIZE+MARGIN_TOP);
+    }
+
+    for (var y = 0; y <= TEMPLATE_HEIGHT;  y++) {
+        this.graphics.moveTo(px, y*BOX_SIZE+MARGIN_TOP);
+        this.graphics.lineTo(TEMPLATE_WIDTH*BOX_SIZE+px, y*BOX_SIZE+MARGIN_TOP);
+    }
+
     this.graphics.closePath();
     this.graphics.stroke();
+    this.graphics.fillStyle = "rgba(255,255,255, .5)";
+    this.graphics.fillRect(MARGIN_LEFT-BOX_SIZE*(TEMPLATE_WIDTH+1), MARGIN_TOP,
+			BOX_SIZE*TEMPLATE_WIDTH, BOX_SIZE*TEMPLATE_HEIGHT);
+
+    this.graphics.fillRect(MARGIN_LEFT+this.boardWidth*BOX_SIZE+BOX_SIZE, MARGIN_TOP,
+			BOX_SIZE*TEMPLATE_WIDTH, BOX_SIZE*TEMPLATE_HEIGHT);
+
+    this.graphics.fillStyle = "blue";
+	this.graphics.font = "bold 30px Arial";
+	px = 5 + MARGIN_LEFT-BOX_SIZE*(TEMPLATE_WIDTH+1);
+	this.graphics.fillText("Score:", px, MARGIN_TOP + 30);
+    this.graphics.fillText(this.score.toString(), px, MARGIN_TOP + 60);
+
+	var py = MARGIN_TOP + BOX_SIZE*(TEMPLATE_HEIGHT+1) + 50;
+
+    this.graphics.fillStyle = "red";
+	if (this.gameOver) {
+		this.graphics.fillText("Game Over", MARGIN_LEFT + 20, py);
+	} else if (this.gamePaused) {
+		this.graphics.fillText("Game Paused", MARGIN_LEFT + 10, py);
+	}
 }
 
 board.prototype.drawSpirit = function(spirit) {
+	var spirit = this.fallingSpirit;
     var color = spirit.color;
     this.graphics.fillStyle = this.clolorMap[color];
-    var px = BOARD_MARGIN + spirit.x*BOX_SIZE;
-    var py = BOARD_MARGIN + spirit.y*BOX_SIZE;
+    var px = MARGIN_LEFT + spirit.x*BOX_SIZE;
+    var py = MARGIN_TOP + spirit.y*BOX_SIZE;
     for (var x = 0; x < TEMPLATE_WIDTH;  x++) {
         for (var y = 0; y < TEMPLATE_HEIGHT;  y++) {
             if (this.SPIRITS[spirit.shape][spirit.rotation][y].charCodeAt(x) != BLANK) {
@@ -206,12 +134,24 @@ board.prototype.drawSpirit = function(spirit) {
             }
         }
     }
+	spirit = this.nextSpirit;
+	color = spirit.color;
+    this.graphics.fillStyle = this.clolorMap[color];
+	px = MARGIN_LEFT+this.boardWidth*BOX_SIZE+BOX_SIZE;
+    py = MARGIN_TOP;
+    for (var x = 0; x < TEMPLATE_WIDTH;  x++) {
+        for (var y = 0; y < TEMPLATE_HEIGHT;  y++) {
+            if (this.SPIRITS[spirit.shape][spirit.rotation][y].charCodeAt(x) != BLANK) {
+                this.graphics.fillRect(px+x*BOX_SIZE, py+y*BOX_SIZE, BOX_SIZE, BOX_SIZE);
+            }
+        }
+    }
 }
 
 board.prototype.clearScreen = function() {
-    this.graphics.fillStyle = "#000000";
-    this.graphics.fillRect(10, 10,
-        (this.boardWidth+1)*BOX_SIZE+BOARD_MARGIN, (this.boardHeight+1)*BOX_SIZE+BOARD_MARGIN);
+    this.graphics.fillStyle = "rgb(50,50,50)";
+    this.graphics.fillRect(0, 0,
+        this.boardWidth*BOX_SIZE+MARGIN_LEFT*2, this.boardHeight*BOX_SIZE+MARGIN_TOP*2);
 }
 
 
@@ -227,14 +167,16 @@ board.prototype.updateDisplay = function() {
 
 board.prototype.gameLoop = function() {
     if (this.gamePaused || this.gameOver) {
-        return false;
+		this.updateDisplay();
+        return;
     }
     if (this.fallingSpirit == null) {
-        this.fallingSpirit = this.newSpirit();
+        this.fallingSpirit = this.nextSpirit;
+        this.nextSpirit = this.newSpirit();
         if(!this.isValidPosition(this.fallingSpirit, 0, 0)) { // game over
             this.updateDisplay();
             this.gameOver = true;
-            return true;
+            return;
         }
     }
 
@@ -257,13 +199,10 @@ board.prototype.gameLoop = function() {
     }
 
     this.updateDisplay();
-    return false;
 }
 
 function loop() {
-  if (workBoard.gameLoop()) {
-    return;
-  }
+  workBoard.gameLoop();
   window.setTimeout("loop()", interval);
 }
 
@@ -277,7 +216,7 @@ board.prototype.newSpirit = function() {
   spirit.shape = shape;
   spirit.rotation = Math.floor(Math.random()*this.SPIRITS[shape].length);
   spirit.x = Math.floor(this.boardWidth / 2) - Math.floor(TEMPLATE_WIDTH / 2);
-  spirit.y = -5;
+  spirit.y = -3;
   spirit.color = Math.floor(Math.random()*this.clolorMap.length);
   return spirit;
 }
